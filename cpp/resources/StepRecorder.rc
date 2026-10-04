@@ -1,0 +1,121 @@
+#include "resource.h"
+#define APSTUDIO_READONLY_SYMBOLS
+#include "afxres.h"
+#undef APSTUDIO_READONLY_SYMBOLS
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+
+IDR_MAINFRAME           ICON                    "icons\\app.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_MAIN_DIALOG DIALOGEX 0, 0, 480, 320
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_THICKFRAME
+CAPTION "Step Recorder"
+FONT 9, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_TAB_MAIN,"SysTabControl32",WS_TABSTOP | WS_CLIPSIBLINGS,7,7,466,285
+    PUSHBUTTON      "Settings...",IDC_BTN_SETTINGS,7,298,60,16
+    DEFPUSHBUTTON   "Close",IDOK,413,298,60,16
+END
+
+IDD_WORK_PAGE DIALOGEX 0, 0, 456, 260
+STYLE DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD | WS_VISIBLE
+FONT 9, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "Save ZIP to:",IDC_STATIC,6,8,46,8
+    EDITTEXT        IDC_EDIT_PATH,56,6,326,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Browse...",IDC_BTN_BROWSE,386,5,64,15
+
+    CONTROL         "Record mouse clicks",IDC_CHK_CLICKS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,26,140,10
+    CONTROL         "Record keyboard input",IDC_CHK_KEYS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,156,26,140,10
+    CONTROL         "Highlight click location",IDC_CHK_HIGHLIGHT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,40,140,10
+    CONTROL         "Capture full screen (not just window)",IDC_CHK_FULLSCREEN,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,156,40,160,10
+
+    PUSHBUTTON      "Start Recording",IDC_BTN_START,6,56,120,22
+    PUSHBUTTON      "Stop && Save ZIP",IDC_BTN_STOP,132,56,120,22,WS_DISABLED
+    LTEXT           "Steps recorded: 0",IDC_STATIC_COUNT,262,63,188,10
+
+    CONTROL         "",IDC_PROGRESS_RECORDING,"msctls_progress32",WS_BORDER,6,82,444,6
+
+    LTEXT           "Recorded Steps Live Stream:",IDC_STATIC,6,94,150,8
+    CONTROL         "",IDC_LIST_STEPS,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | WS_BORDER | WS_TABSTOP,6,106,444,132
+    LTEXT           "Ready",IDC_STATIC_STATUS,6,244,444,12,SS_SUNKEN
+END
+
+IDD_HISTORY_PAGE DIALOGEX 0, 0, 456, 260
+STYLE DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD | WS_VISIBLE
+FONT 9, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "Past Recordings History:",IDC_STATIC,6,6,150,8
+    CONTROL         "",IDC_LIST_HISTORY,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | WS_BORDER | WS_TABSTOP,6,18,444,208
+
+    PUSHBUTTON      "Open ZIP",IDC_BTN_OPEN_ZIP,6,234,60,18
+    PUSHBUTTON      "Open Folder",IDC_BTN_OPEN_FOLDER,72,234,64,18
+    PUSHBUTTON      "View HTML Report",IDC_BTN_VIEW_REPORT,142,234,80,18
+    PUSHBUTTON      "Delete Record",IDC_BTN_DELETE_RECORD,228,234,64,18
+    PUSHBUTTON      "Clear All",IDC_BTN_CLEAR_HISTORY,298,234,54,18
+    PUSHBUTTON      "Refresh",IDC_BTN_REFRESH,396,234,54,18
+END
+
+IDD_SETTINGS_DIALOG DIALOGEX 0, 0, 240, 140
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Step Recorder Settings"
+FONT 9, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        "Capture Timing Adjustments",IDC_STATIC,7,7,226,98
+    LTEXT           "Click delay (ms):",IDC_STATIC,18,25,90,8
+    EDITTEXT        IDC_EDIT_CLICK_DELAY,120,23,60,14,ES_NUMBER
+    LTEXT           "Key press delay (ms):",IDC_STATIC,18,47,90,8
+    EDITTEXT        IDC_EDIT_KEY_DELAY,120,45,60,14,ES_NUMBER
+    LTEXT           "Typing grouping gap (ms):",IDC_STATIC,18,69,98,8
+    EDITTEXT        IDC_EDIT_TYPING_GAP,120,67,60,14,ES_NUMBER
+
+    DEFPUSHBUTTON   "OK",IDOK,127,118,50,15
+    PUSHBUTTON      "Cancel",IDCANCEL,183,118,50,15
+END
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "CompanyName", "StepRecorder"
+            VALUE "FileDescription", "Step Recorder Desktop Application"
+            VALUE "FileVersion", "1.0.0.1"
+            VALUE "InternalName", "StepRecorder.exe"
+            VALUE "LegalCopyright", "Copyright (C) 2026. All rights reserved."
+            VALUE "OriginalFilename", "StepRecorder.exe"
+            VALUE "ProductName", "Step Recorder"
+            VALUE "ProductVersion", "1.0.0.1"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+#endif    // English (United States) resources

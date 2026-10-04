@@ -1,0 +1,16 @@
+{
+  "timing": {
+    "clickDelayMs": 400,
+    "keyDelayMs": 600,
+    "typingGapMs": 1200
+  },
+  "capture": {
+    "recordClicks": true,
+    "recordKeys": true,
+    "highlightClicks": true,
+    "fullScreen": false
+  },
+  "storage": {
+    "defaultZipName": "steps.zip"
+  }
+}
