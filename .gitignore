@@ -43,26 +43,20 @@ build/
 Build/
 build-*/
 
-# CMake generated files
-CMakeFiles/
-CMakeCache.txt
-cmake_install.cmake
-Makefile
-install_manifest.txt
-compile_commands.json
+# Output distributions & test archives
+dist/
+selftest_out.zip
+*.zip
+
+# Visual Studio local settings & caches
+.vs/
+*.vcxproj.user
+*.suo
+*.user
 
 # Temporary files
 *.tmp
 *.log
 *.bak
 *.swp
-
-# vcpkg
-vcpkg_installed/
-
-# debug information files
-*.dwo
-
-# test output & cache
-Testing/
-.cache/
+.recovery
