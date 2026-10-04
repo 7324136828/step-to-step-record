@@ -1,0 +1,97 @@
+name: Build and release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Windows x64 release
+    runs-on: windows-2025-vs2026
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: pwsh
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Build Release x64
+        run: ./scripts/build.ps1 -Configuration Release -Platform x64
+
+      - name: Run unit tests and application self-test
+        timeout-minutes: 2
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $binDir = Join-Path $env:GITHUB_WORKSPACE 'build/bin/x64/Release'
+          $verificationDir = Join-Path $env:GITHUB_WORKSPACE 'build/verification/ci'
+          New-Item -ItemType Directory -Path $verificationDir -Force | Out-Null
+          $testCases = @(
+            @{ Executable = 'Tests.exe'; Arguments = '' },
+            @{ Executable = 'StepRecorder.exe'; Arguments = '--selftest' }
+          )
+          foreach ($testCase in $testCases) {
+            $startInfo = [System.Diagnostics.ProcessStartInfo]::new()
+            $startInfo.FileName = Join-Path $binDir $testCase.Executable
+            $startInfo.Arguments = $testCase.Arguments
+            $startInfo.WorkingDirectory = $verificationDir
+            $startInfo.UseShellExecute = $false
+            $startInfo.CreateNoWindow = $true
+            $testProcess = [System.Diagnostics.Process]::Start($startInfo)
+            try {
+              if (-not $testProcess.WaitForExit(30000)) {
+                throw "$($testCase.Executable) timed out after 30 seconds."
+              }
+              if ($testProcess.ExitCode -ne 0) {
+                throw "$($testCase.Executable) failed with exit code $($testProcess.ExitCode)."
+              }
+            } finally {
+              if (-not $testProcess.HasExited) {
+                $testProcess.Kill()
+                $testProcess.WaitForExit()
+              }
+              $testProcess.Dispose()
+            }
+          }
+
+      - name: Package timestamped release assets
+        id: package
+        run: |
+          $ErrorActionPreference = 'Stop'
+          ./scripts/package.ps1 -Configuration Release -Platform x64
+          $version = [DateTime]::UtcNow.ToString('yyyy.MM.ddHHmm', [Globalization.CultureInfo]::InvariantCulture)
+          $assetName = "StepRecorder-$version-x64"
+          Copy-Item -LiteralPath 'build/bin/x64/Release/StepRecorder.exe' -Destination "dist/$assetName.exe"
+          Move-Item -LiteralPath 'dist/StepRecorder-Release-x64.zip' -Destination "dist/$assetName.zip"
+          "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          "asset_name=$assetName" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ steps.package.outputs.version }}
+          ASSET_NAME: ${{ steps.package.outputs.asset_name }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $notes = 'Windows x64 build. Requires the latest x64 Microsoft Visual C++ Redistributable: https://aka.ms/vc14/vc_redist.x64.exe'
+          # Creating the tag atomically prevents reusing a timestamp from another run.
+          gh api --method POST "repos/$env:GITHUB_REPOSITORY/git/refs" --raw-field "ref=refs/tags/$env:RELEASE_VERSION" --raw-field "sha=$env:GITHUB_SHA" --silent
+          if ($LASTEXITCODE -ne 0) {
+            throw 'Release tag creation failed. Existing tags are never overwritten; retry in a later UTC minute if the timestamp is already in use.'
+          }
+          # gh uploads assets to a draft before publishing the completed release.
+          gh release create "$env:RELEASE_VERSION" "dist/$env:ASSET_NAME.exe" "dist/$env:ASSET_NAME.zip" --repo "$env:GITHUB_REPOSITORY" --verify-tag --title "$env:RELEASE_VERSION" --notes "$notes" --generate-notes
+          if ($LASTEXITCODE -ne 0) {
+            throw 'Release creation or asset upload failed. Inspect the tag and any draft release before retrying in a later UTC minute.'
+          }

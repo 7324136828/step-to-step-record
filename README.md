@@ -129,6 +129,17 @@ package.bat -Configuration Release -Platform x64
 ```
 Packages production binaries, sample configuration, and notices into `dist/StepRecorder-Release-x64.zip`.
 
+### 6. Automated GitHub Releases
+
+The [Build and release workflow](.github/workflows/release.yml) builds and tests the Windows x64 Release configuration on every push to `main`. You can also run it from **Actions → Build and release → Run workflow**, selecting the branch to release.
+
+After the unit tests and application self-test pass, the workflow publishes a GitHub release with a tag and title in `YYYY.mm.ddhhmm` format, using UTC and 24-hour time. For example, `2026.10.031430` represents October 3, 2026 at 14:30 UTC. Each release includes:
+
+- `StepRecorder-2026.10.031430-x64.exe`: the application executable.
+- `StepRecorder-2026.10.031430-x64.zip`: the executable, README, sample configuration, and third-party notices.
+
+Install the [latest x64 Microsoft Visual C++ Redistributable](https://aka.ms/vc14/vc_redist.x64.exe) before running the application. The workflow uses the repository's built-in `GITHUB_TOKEN`; no extra release secret is needed. Release runs are serialized, and an existing timestamp is never overwritten. If the timestamp is already in use, retry in a later UTC minute. Interactive dialog lifecycle tests remain available through `test.bat` locally.
+
 ---
 
 ## Features & Capabilities
